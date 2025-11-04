@@ -1,2 +1,221 @@
-# bruno-com-aids
-bruno e o mais gay
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Catálogo de Filmes</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#ff6b6b; --muted:#94a3b8; --glass:rgba(255,255,255,0.04);
+      --radius:12px; --gap:18px; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; background:linear-gradient(180deg,#071123 0%, #0f1724 60%); color:#e6eef8; -webkit-font-smoothing:antialiased;
+      padding:32px; box-sizing:border-box;
+    }
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ffb86b);display:grid;place-items:center;font-weight:700;color:#061020}
+    h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:12px;align-items:center}
+    input.search{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:10px 14px;border-radius:10px;color:var(--muted);min-width:220px}
+    select, button{padding:10px 12px;border-radius:10px;border:none;background:rgba(255,255,255,0.03);color:var(--muted)}
+
+    main{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);overflow:hidden;box-shadow:0 6px 18px rgba(2,6,23,0.6);transform-origin:center;backdrop-filter: blur(6px);
+      transition:transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .28s;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 18px 40px rgba(2,6,23,0.7)}
+    .poster{width:100%;height:320px;object-fit:cover;display:block}
+    .meta{padding:12px}
+    .title-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .title{font-weight:600;font-size:15px}
+    .sub{font-size:13px;color:var(--muted)}
+    .genres{margin-top:8px;font-size:12px;color:var(--muted)}
+    .fav{background:none;border:none;color:var(--accent);cursor:pointer;font-weight:700}
+
+    /* Modal */
+    .modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px}
+    .modal-wrap.show{display:flex}
+    .modal{width:min(880px,96%);background:linear-gradient(180deg,#071022, #081426);border-radius:14px;padding:18px;box-shadow:0 30px 80px rgba(2,6,23,0.8);border:1px solid rgba(255,255,255,0.04)}
+    .modal-grid{display:grid;grid-template-columns:260px 1fr;gap:16px}
+    .modal .poster{height:360px;border-radius:10px}
+    .close{position:absolute;top:18px;right:18px;background:none;border:0;color:var(--muted);font-size:18px}
+
+    /* small screens */
+    @media (max-width:700px){.modal-grid{grid-template-columns:1fr}.poster{height:220px}}
+
+    /* subtle enter animation for cards via JS (when inserted) */
+    .card.enter{animation:pop .36s cubic-bezier(.2,.9,.3,1)}
+    @keyframes pop{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+
+    /* empty state */
+    .empty{grid-column:1/-1;padding:36px;border-radius:12px;background:rgba(255,255,255,0.02);text-align:center;color:var(--muted)}
+
+    footer{margin-top:28px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">CF</div>
+      <div>
+        <h1>Catálogo de Filmes</h1>
+        <div class="sub">Visualize, pesquise e anime o catálogo</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input class="search" id="q" placeholder="Buscar título, gênero ou ano..." />
+      <select id="filterGenre"><option value="">Todos os gêneros</option></select>
+      <button id="clear">Limpar</button>
+    </div>
+  </header>
+
+  <main id="grid"></main>
+
+  <div class="modal-wrap" id="modalWrap">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close" id="closeBtn">✕</button>
+      <div class="modal-grid">
+        <img id="modalPoster" class="poster" src="" alt="Poster" />
+        <div>
+          <h2 id="modalTitle"></h2>
+          <div class="sub" id="modalSub"></div>
+          <p id="modalDesc" style="margin-top:12px;color:var(--muted)"></p>
+          <div style="margin-top:18px;display:flex;gap:12px;align-items:center">
+            <button id="addFav">Adicionar aos favoritos</button>
+            <div class="sub" id="modalRating"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Exemplo estático — abra este arquivo localmente no navegador. Quer integração com uma API (TMDB/OMDB) ou backend? Peça que eu adicione.</footer>
+
+  <script>
+    // Dados de exemplo
+    const movies = [
+      {id:1,title:'A Odisseia Lunar',year:2021,genres:['Ficção','Aventura'],rating:8.1,poster:'https://picsum.photos/seed/1/600/900',desc:'Uma jornada épica através do espaço e do tempo.'},
+      {id:2,title:'Noite em Lisboa',year:2019,genres:['Drama','Mistério'],rating:7.3,poster:'https://picsum.photos/seed/2/600/900',desc:'Segredos do passado retornam em uma noite chuvosa.'},
+      {id:3,title:'Riso Final',year:2023,genres:['Comédia'],rating:6.8,poster:'https://picsum.photos/seed/3/600/900',desc:'Uma comédia sobre amizades e recomeços.'},
+      {id:4,title:'Mar de Vidro',year:2018,genres:['Drama','Romance'],rating:8.5,poster:'https://picsum.photos/seed/4/600/900',desc:'Dois estranhos, uma costa e um segredo.'},
+      {id:5,title:'Exploradores do Código',year:2024,genres:['Ação','Ficção'],rating:7.9,poster:'https://picsum.photos/seed/5/600/900',desc:'Hackers heróicos salvam o sistema.'}
+    ];
+
+    // Estado
+    let state = {q:'',genre:'',favorites: new Set(JSON.parse(localStorage.getItem('favs')||'[]'))};
+
+    const grid = document.getElementById('grid');
+    const q = document.getElementById('q');
+    const filterGenre = document.getElementById('filterGenre');
+    const modalWrap = document.getElementById('modalWrap');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalPoster = document.getElementById('modalPoster');
+    const modalSub = document.getElementById('modalSub');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalRating = document.getElementById('modalRating');
+    const addFav = document.getElementById('addFav');
+
+    // Popular dropdown de gêneros
+    (function populateGenres(){
+      const set = new Set(); movies.forEach(m=>m.genres.forEach(g=>set.add(g)));
+      Array.from(set).sort().forEach(g=>{
+        const opt = document.createElement('option'); opt.value=g; opt.textContent=g; filterGenre.appendChild(opt);
+      });
+    })();
+
+    function saveFavs(){
+      localStorage.setItem('favs', JSON.stringify(Array.from(state.favorites)));
+    }
+
+    function render(){
+      grid.innerHTML='';
+      // filtro
+      const filtered = movies.filter(m=>{
+        const byQ = state.q.trim().toLowerCase();
+        let ok=true;
+        if(byQ){ ok = m.title.toLowerCase().includes(byQ) || (m.genres.join(' ').toLowerCase().includes(byQ)) || (String(m.year).includes(byQ)); }
+        if(state.genre){ ok = ok && m.genres.includes(state.genre); }
+        return ok;
+      });
+
+      if(filtered.length===0){ const e = document.createElement('div'); e.className='empty'; e.textContent='Nenhum filme encontrado.'; grid.appendChild(e); return; }
+
+      filtered.forEach(m=>{
+        const card = document.createElement('article'); card.className='card enter';
+        card.innerHTML = `
+          <img class="poster" loading="lazy" src="${m.poster}" alt="Poster de ${m.title}" />
+          <div class="meta">
+            <div class="title-row">
+              <div>
+                <div class="title">${m.title}</div>
+                <div class="sub">${m.year} • ${m.genres.join(', ')}</div>
+              </div>
+              <div>
+                <button class="fav" data-id="${m.id}">${state.favorites.has(m.id)?'★':'☆'}</button>
+              </div>
+            </div>
+            <div class="genres">${m.desc}</div>
+          </div>
+        `;
+
+        // clique para abrir modal
+        card.querySelector('.poster').addEventListener('click',()=>openModal(m));
+        card.querySelector('.fav').addEventListener('click', (e)=>{
+          const id = m.id;
+          if(state.favorites.has(id)) state.favorites.delete(id); else state.favorites.add(id);
+          saveFavs(); render(); e.stopPropagation();
+        });
+
+        // efeito leve: parallax ao mover mouse
+        card.addEventListener('mousemove', (ev)=>{
+          const rect = card.getBoundingClientRect();
+          const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
+          const dx = (ev.clientX - cx)/20; const dy = (ev.clientY - cy)/30;
+          card.style.transform = `translateY(-6px) rotateX(${ -dy }deg) rotateY(${ dx }deg) scale(1.01)`;
+        });
+        card.addEventListener('mouseleave', ()=>{ card.style.transform=''; });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function openModal(m){
+      modalTitle.textContent = m.title;
+      modalPoster.src = m.poster;
+      modalSub.textContent = `${m.year} • ${m.genres.join(', ')}`;
+      modalDesc.textContent = m.desc;
+      modalRating.textContent = `Nota: ${m.rating}`;
+      addFav.textContent = state.favorites.has(m.id)?'Remover dos favoritos':'Adicionar aos favoritos';
+      addFav.onclick = ()=>{
+        if(state.favorites.has(m.id)) state.favorites.delete(m.id); else state.favorites.add(m.id);
+        saveFavs(); addFav.textContent = state.favorites.has(m.id)?'Remover dos favoritos':'Adicionar aos favoritos'; render();
+      };
+      modalWrap.classList.add('show');
+      // animação simples de foco
+      modalWrap.querySelector('.modal').animate([{transform:'translateY(20px)',opacity:0},{transform:'none',opacity:1}],{duration:260,easing:'cubic-bezier(.2,.9,.3,1)'});
+    }
+
+    document.getElementById('closeBtn').addEventListener('click',()=>modalWrap.classList.remove('show'));
+    modalWrap.addEventListener('click',(e)=>{ if(e.target===modalWrap) modalWrap.classList.remove('show'); });
+
+    q.addEventListener('input',(e)=>{ state.q = e.target.value; render(); });
+    filterGenre.addEventListener('change',(e)=>{ state.genre = e.target.value; render(); });
+    document.getElementById('clear').addEventListener('click',()=>{ q.value=''; filterGenre.value=''; state.q=''; state.genre=''; render(); });
+
+    // tecla / foca busca
+    window.addEventListener('keydown', (ev)=>{ if(ev.key==='/' && document.activeElement.tagName!=='INPUT') { ev.preventDefault(); q.focus(); }});
+
+    // render inicial
+    render();
+
+    // pequeno efeito de entrada para o header/logo
+    document.querySelector('.logo').animate([{transform:'scale(.85)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:'cubic-bezier(.2,.9,.3,1)'});
+  </script>
+</body>
+</html>
