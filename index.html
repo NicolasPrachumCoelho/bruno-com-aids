@@ -37,7 +37,6 @@
     .genres{margin-top:8px;font-size:12px;color:var(--muted)}
     .fav{background:none;border:none;color:var(--accent);cursor:pointer;font-weight:700}
 
-    /* Modal */
     .modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px}
     .modal-wrap.show{display:flex}
     .modal{width:min(880px,96%);background:linear-gradient(180deg,#071022, #081426);border-radius:14px;padding:18px;box-shadow:0 30px 80px rgba(2,6,23,0.8);border:1px solid rgba(255,255,255,0.04)}
@@ -45,14 +44,11 @@
     .modal .poster{height:360px;border-radius:10px}
     .close{position:absolute;top:18px;right:18px;background:none;border:0;color:var(--muted);font-size:18px}
 
-    /* small screens */
     @media (max-width:700px){.modal-grid{grid-template-columns:1fr}.poster{height:220px}}
 
-    /* subtle enter animation for cards via JS (when inserted) */
     .card.enter{animation:pop .36s cubic-bezier(.2,.9,.3,1)}
     @keyframes pop{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
 
-    /* empty state */
     .empty{grid-column:1/-1;padding:36px;border-radius:12px;background:rgba(255,255,255,0.02);text-align:center;color:var(--muted)}
 
     footer{margin-top:28px;color:var(--muted);font-size:13px}
@@ -98,9 +94,8 @@
   <footer>Exemplo estático — abra este arquivo localmente no navegador. Quer integração com uma API (TMDB/OMDB) ou backend? Peça que eu adicione.</footer>
 
   <script>
-    // Dados de exemplo
     const movies = [
-      {id:1,title:'A Odisseia Lunar',year:2021,genres:['Ficção','Aventura'],rating:8.1,poster:'https://picsum.photos/seed/1/600/900',desc:'Uma jornada épica através do espaço e do tempo.'},
+      {id:1,title:'Breaking Bad',year:2008,genres:['Drama','Mistério'],rating:8.1,poster:'https://static.wikia.nocookie.net/assista-series/images/5/56/Breaking-Bad.jpg/revision/latest?cb=20150528205254&path-prefix=pt-br',desc:'Uma jornada épica através do espaço e do tempo.'},
       {id:2,title:'Noite em Lisboa',year:2019,genres:['Drama','Mistério'],rating:7.3,poster:'https://picsum.photos/seed/2/600/900',desc:'Segredos do passado retornam em uma noite chuvosa.'},
       {id:3,title:'Riso Final',year:2023,genres:['Comédia'],rating:6.8,poster:'https://picsum.photos/seed/3/600/900',desc:'Uma comédia sobre amizades e recomeços.'},
       {id:4,title:'Mar de Vidro',year:2018,genres:['Drama','Romance'],rating:8.5,poster:'https://picsum.photos/seed/4/600/900',desc:'Dois estranhos, uma costa e um segredo.'},
