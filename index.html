@@ -91,18 +91,15 @@
     </div>
   </div>
 
-  <footer>Exemplo estático — abra este arquivo localmente no navegador. Quer integração com uma API (TMDB/OMDB) ou backend? Peça que eu adicione.</footer>
-
   <script>
     const movies = [
-      {id:1,title:'Breaking Bad',year:2008,genres:['Drama','Mistério'],rating:8.1,poster:'https://i5.walmartimages.com/seo/Breaking-Bad-Poster-24inx36in-61cm-x-91cm-Art-Poster-24x36-Multi-Color-Square-Adults-Z-Posters_83fb5527-feb5-4e49-81a8-db275f1e891c.63721a15d3c122255865178504861cd7.jpeg',desc:'Uma jornada épica através do espaço e do tempo.'},
+      {id:1,title:'Breaking Bad',year:2008,genres:['Drama','Mistério'],rating:8.1,poster:'https://i5.walmartimages.com/seo/Breaking-Bad-Poster-24inx36in-61cm-x-91cm-Art-Poster-24x36-Multi-Color-Square-Adults-Z-Posters_83fb5527-feb5-4e49-81a8-db275f1e891c.63721a15d3c122255865178504861cd7.jpeg',desc:'Walter White (Bryan Cranston) é um professor de química na casa dos 50 anos que trabalha em uma escola secundária no Novo México. Para atender às necessidades de Skyler (Anna Gunn), sua esposa grávida, e Walt Junior (RJ Mitte), seu filho deficiente físico, ele tem que trabalhar duplamente. Sua vida fica ainda mais complicada quando descobre que está sofrendo de um câncer de pulmão incurável. Para aumentar rapidamente a quantidade de dinheiro que deixaria para sua família após sua morte, Walter usa seu conhecimento de química para fazer e vender metanfetamina, uma droga sintética. Ele conta com a ajuda do ex-aluno e pequeno traficante Jesse (Aaron Paul) e enfrenta vários desafios, incluindo o fato de seu concunhado ser um importante nome dentro da Agência Anti-Drogas da região.'},
       {id:2,title:'Noite em Lisboa',year:2019,genres:['Drama','Mistério'],rating:7.3,poster:'https://picsum.photos/seed/2/600/900',desc:'Segredos do passado retornam em uma noite chuvosa.'},
       {id:3,title:'Riso Final',year:2023,genres:['Comédia'],rating:6.8,poster:'https://picsum.photos/seed/3/600/900',desc:'Uma comédia sobre amizades e recomeços.'},
       {id:4,title:'Mar de Vidro',year:2018,genres:['Drama','Romance'],rating:8.5,poster:'https://picsum.photos/seed/4/600/900',desc:'Dois estranhos, uma costa e um segredo.'},
       {id:5,title:'Exploradores do Código',year:2024,genres:['Ação','Ficção'],rating:7.9,poster:'https://picsum.photos/seed/5/600/900',desc:'Hackers heróicos salvam o sistema.'}
     ];
 
-    // Estado
     let state = {q:'',genre:'',favorites: new Set(JSON.parse(localStorage.getItem('favs')||'[]'))};
 
     const grid = document.getElementById('grid');
@@ -116,7 +113,6 @@
     const modalRating = document.getElementById('modalRating');
     const addFav = document.getElementById('addFav');
 
-    // Popular dropdown de gêneros
     (function populateGenres(){
       const set = new Set(); movies.forEach(m=>m.genres.forEach(g=>set.add(g)));
       Array.from(set).sort().forEach(g=>{
@@ -159,7 +155,6 @@
           </div>
         `;
 
-        // clique para abrir modal
         card.querySelector('.poster').addEventListener('click',()=>openModal(m));
         card.querySelector('.fav').addEventListener('click', (e)=>{
           const id = m.id;
@@ -167,7 +162,6 @@
           saveFavs(); render(); e.stopPropagation();
         });
 
-        // efeito leve: parallax ao mover mouse
         card.addEventListener('mousemove', (ev)=>{
           const rect = card.getBoundingClientRect();
           const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
@@ -192,7 +186,6 @@
         saveFavs(); addFav.textContent = state.favorites.has(m.id)?'Remover dos favoritos':'Adicionar aos favoritos'; render();
       };
       modalWrap.classList.add('show');
-      // animação simples de foco
       modalWrap.querySelector('.modal').animate([{transform:'translateY(20px)',opacity:0},{transform:'none',opacity:1}],{duration:260,easing:'cubic-bezier(.2,.9,.3,1)'});
     }
 
@@ -203,13 +196,10 @@
     filterGenre.addEventListener('change',(e)=>{ state.genre = e.target.value; render(); });
     document.getElementById('clear').addEventListener('click',()=>{ q.value=''; filterGenre.value=''; state.q=''; state.genre=''; render(); });
 
-    // tecla / foca busca
     window.addEventListener('keydown', (ev)=>{ if(ev.key==='/' && document.activeElement.tagName!=='INPUT') { ev.preventDefault(); q.focus(); }});
 
-    // render inicial
     render();
 
-    // pequeno efeito de entrada para o header/logo
     document.querySelector('.logo').animate([{transform:'scale(.85)',opacity:0},{transform:'none',opacity:1}],{duration:420,easing:'cubic-bezier(.2,.9,.3,1)'});
   </script>
 </body>
